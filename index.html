@@ -1,0 +1,147 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Calculate yield of traditional dairy products like paneer, ghee, dahi, khoa, chhena etc. based on fat, SNF, milk type – as per FSSAI standards.">
+  <title>Dairy Yield Calculator – Traditional Products</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fdfdfd; padding: 20px; max-width: 700px; margin: auto; }
+    h1 { color: #2b3a67; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input, select, button { padding: 8px; margin-top: 5px; width: 100%; max-width: 300px; }
+    .output-box { margin-top: 25px; padding: 15px; background: #eef; border-radius: 8px; }
+    .standard { margin-top: 10px; background: #ffd; padding: 10px; border-left: 5px solid orange; }
+    footer { margin-top: 40px; padding: 15px; background: #f0f0f0; text-align: center; border-top: 1px solid #ccc; }
+  </style>
+</head>
+<body><h1>🧮 Traditional Dairy Yield Calculator</h1><label for="milkQty">Milk Quantity (Litres):</label> <input type="number" id="milkQty">
+
+<label for="fat">Fat %:</label> <input type="number" id="fat">
+
+<label for="snf">SNF %:</label> <input type="number" id="snf">
+
+<label for="milkType">Milk Type:</label> <select id="milkType">
+
+  <option value="cow">Cow</option>
+  <option value="buffalo">Buffalo</option>
+  <option value="mixed">Mixed</option>
+</select><label for="product">Product:</label> <select id="product" onchange="updateInputs()">
+
+  <option value="paneer">Paneer</option>
+  <option value="ghee">Ghee</option>
+  <option value="dahi">Dahi</option>
+  <option value="khoa">Khoa</option>
+  <option value="chhena">Chhena</option>
+  <option value="rasgulla">Rasgulla</option>
+  <option value="pedha">Pedha</option>
+  <option value="burfi">Burfi</option>
+  <option value="rabri">Rabri</option>
+  <option value="shrikhand">Shrikhand</option>
+  <option value="lassi">Lassi</option>
+  <option value="icecream">Ice Cream</option>
+</select><div id="extraInputs"></div><button onclick="calculateYield()">Calculate Yield</button>
+
+<div class="output-box" id="result" style="display:none;"></div><footer>
+  <p><strong>Created by:</strong> Harsh Tiwari</p>
+  <p>B.Tech in Dairy Technology | <em>West Bengal University of Animal and Fishery Sciences, Kolkata</em></p>
+  <p>Passionate about traditional Indian dairy innovation & FSSAI-based processing standards.</p>
+</footer><script>
+function updateInputs() {
+  const product = document.getElementById('product').value;
+  const extraDiv = document.getElementById('extraInputs');
+  extraDiv.innerHTML = '';
+  if (product === 'paneer') {
+    extraDiv.innerHTML += `<label>Coagulant Type:</label><select><option>Citric Acid</option><option>Lactic Acid</option><option>Rennet</option></select>`;
+    extraDiv.innerHTML += `<label>Coagulation Temp (°C):</label><input type='number'>`;
+  } else if (product === 'ghee') {
+    extraDiv.innerHTML += `<label>Source Type:</label><select><option>Cream</option><option>Butter</option><option>Curd</option></select>`;
+  } else if (product === 'dahi') {
+    extraDiv.innerHTML += `<label>Culture %:</label><input type='number'>`;
+    extraDiv.innerHTML += `<label>Incubation Temp (°C):</label><input type='number'>`;
+  }
+}
+
+function calculateYield() {
+  const qty = parseFloat(document.getElementById('milkQty').value);
+  const fat = parseFloat(document.getElementById('fat').value);
+  const snf = parseFloat(document.getElementById('snf').value);
+  const milkType = document.getElementById('milkType').value;
+  const product = document.getElementById('product').value;
+
+  let yieldVal = 0;
+  let standard = "";
+  let tips = "";
+
+  switch(product) {
+    case "paneer":
+      const k = milkType === "buffalo" ? 1.3 : 1.1;
+      yieldVal = qty * ((fat + snf) / 100) * k;
+      standard = "<b>FSSAI:</b> Fat ≥ 50% (on dry matter), Moisture ≤ 60%";
+      tips = "Buffalo milk gives higher paneer yield due to higher solids.";
+      break;
+    case "ghee":
+      yieldVal = qty * (fat / 100) * 0.82;
+      standard = "<b>FSSAI:</b> Fat ≥ 99.5%, Moisture ≤ 0.5%";
+      tips = "Ghee yield depends mostly on fat content. Use buffalo milk for better output.";
+      break;
+    case "dahi":
+      yieldVal = qty * 1.1;
+      standard = "<b>FSSAI:</b> Min Fat: 3.0% (standard), SNF ≥ 8.5%";
+      tips = "SNF and culture quantity affect dahi texture and yield.";
+      break;
+    case "khoa":
+      yieldVal = qty * ((fat + snf) / 100) * 0.9;
+      standard = "<b>FSSAI:</b> Moisture content varies by type (Dhap: 40%, Danedar: 20%, Pindi: 15%)";
+      tips = "Buffalo milk preferred for higher khoa yield.";
+      break;
+    case "chhena":
+      yieldVal = qty * ((fat + snf) / 100) * 0.95;
+      standard = "<b>FSSAI:</b> Similar to paneer, higher moisture allowed";
+      tips = "Use cow milk for softer chhena used in sweets.";
+      break;
+    case "rasgulla":
+      yieldVal = qty * ((fat + snf) / 100) * 1.1;
+      standard = "<b>FSSAI:</b> Moisture max 50%, fat min 5% on dry matter";
+      tips = "Fresh chhena and controlled syrup cooking gives best result.";
+      break;
+    case "pedha":
+      yieldVal = qty * ((fat + snf) / 100) * 0.75;
+      standard = "<b>FSSAI:</b> Milk solids ≥ 65%, sugar varies";
+      tips = "Overheating khoa reduces pedha softness.";
+      break;
+    case "burfi":
+      yieldVal = qty * ((fat + snf) / 100) * 0.8;
+      standard = "<b>FSSAI:</b> Khoa + sugar, minimum 60% solids";
+      tips = "Use pindi khoa for best texture.";
+      break;
+    case "rabri":
+      yieldVal = qty * 0.25;
+      standard = "<b>FSSAI:</b> Traditional product, no fixed standard";
+      tips = "Buffalo milk gives thicker rabri due to higher solids.";
+      break;
+    case "shrikhand":
+      yieldVal = qty * 0.4;
+      standard = "<b>FSSAI:</b> Fat ≥ 8.5%, sugar 40-45%";
+      tips = "Proper whey drainage gives better shrikhand yield.";
+      break;
+    case "lassi":
+      yieldVal = qty * 1.05;
+      standard = "<b>FSSAI:</b> Min fat: 0.8%, SNF ≥ 6.0%";
+      tips = "Sweetened lassi yield is higher due to added sugar/water.";
+      break;
+    case "icecream":
+      yieldVal = qty * ((fat + snf) / 100) * 1.4;
+      standard = "<b>FSSAI:</b> Fat ≥ 10%, total solids ≥ 36% (for full cream)";
+      tips = "Higher overrun increases volume but not weight.";
+      break;
+  }
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').innerHTML = `
+    <h2>📦 Estimated Yield: ${yieldVal.toFixed(2)} kg</h2>
+    <p><b>Tips:</b> ${tips}</p>
+    <div class="standard">${standard}</div>
+  `;
+}
+</script></body>
+</html>

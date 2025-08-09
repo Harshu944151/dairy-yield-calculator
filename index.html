@@ -1,147 +1,263 @@
-<!DOCTYPE html><html lang="en">
+<!doctype html>
+
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Calculate yield of traditional dairy products like paneer, ghee, dahi, khoa, chhena etc. based on fat, SNF, milk type – as per FSSAI standards.">
-  <title>Dairy Yield Calculator – Traditional Products</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dairy Yield Calculator — Upgraded</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #fdfdfd; padding: 20px; max-width: 700px; margin: auto; }
-    h1 { color: #2b3a67; }
-    label { font-weight: bold; display: block; margin-top: 10px; }
-    input, select, button { padding: 8px; margin-top: 5px; width: 100%; max-width: 300px; }
-    .output-box { margin-top: 25px; padding: 15px; background: #eef; border-radius: 8px; }
-    .standard { margin-top: 10px; background: #ffd; padding: 10px; border-left: 5px solid orange; }
-    footer { margin-top: 40px; padding: 15px; background: #f0f0f0; text-align: center; border-top: 1px solid #ccc; }
+    :root{--bg:#f7fafc;--card:#ffffff;--muted:#6b7280;--accent:#1f4ed8}
+    body{font-family:Inter,system-ui,Arial;margin:0;background:var(--bg);padding:24px;display:flex;justify-content:center}
+    .container{width:100%;max-width:900px}
+    header{display:flex;align-items:center;gap:12px}
+    h1{margin:0;color:#0f172a}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    label{display:block;font-weight:600;margin-top:8px;color:#0f172a}
+    input[type=number],select,input[type=checkbox]{padding:8px;margin-top:6px;width:100%;box-sizing:border-box;border:1px solid #e6e9ef;border-radius:8px}
+    .row{display:flex;gap:8px}
+    button{background:var(--accent);color:#fff;border:0;padding:10px 12px;border-radius:8px;cursor:pointer;margin-top:12px}
+    .output{background:#eef6ff;padding:12px;border-radius:8px;margin-top:12px}
+    small.muted{color:var(--muted)}
+    .collapse{margin-top:12px}
+    .toggle{background:#f1f5f9;padding:10px;border-radius:8px;cursor:pointer}
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+    @media(max-width:880px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
-<body><h1>🧮 Traditional Dairy Yield Calculator</h1><label for="milkQty">Milk Quantity (Litres):</label> <input type="number" id="milkQty">
+<body>
+  <div class="container">
+    <header>
+      <h1>🧮 Dairy Yield Calculator — Upgraded</h1>
+    </header><div class="grid">
+  <div class="card">
+    <label>Milk Quantity (L)</label>
+    <input id="milkQty" type="number" min="0" step="0.1" value="10">
 
-<label for="fat">Fat %:</label> <input type="number" id="fat">
+    <label>Fat (%)</label>
+    <input id="fat" type="number" min="0" step="0.1" value="4.0">
 
-<label for="snf">SNF %:</label> <input type="number" id="snf">
+    <label>SNF (%)</label>
+    <input id="snf" type="number" min="0" step="0.1" value="8.5">
 
-<label for="milkType">Milk Type:</label> <select id="milkType">
+    <label>Milk Type</label>
+    <select id="milkType">
+      <option value="cow">Cow</option>
+      <option value="buffalo">Buffalo</option>
+      <option value="mixed">Mixed</option>
+    </select>
 
-  <option value="cow">Cow</option>
-  <option value="buffalo">Buffalo</option>
-  <option value="mixed">Mixed</option>
-</select><label for="product">Product:</label> <select id="product" onchange="updateInputs()">
+    <label>Product</label>
+    <select id="product" onchange="onProductChange()">
+      <option value="paneer">Paneer</option>
+      <option value="ghee">Ghee</option>
+      <option value="dahi">Dahi</option>
+      <option value="khoa">Khoa</option>
+      <option value="chhena">Chhena</option>
+      <option value="rasgulla">Rasgulla</option>
+      <option value="pedha">Pedha</option>
+      <option value="burfi">Burfi</option>
+      <option value="rabri">Rabri</option>
+      <option value="shrikhand">Shrikhand</option>
+      <option value="lassi">Lassi</option>
+      <option value="icecream">Ice Cream</option>
+    </select>
 
-  <option value="paneer">Paneer</option>
-  <option value="ghee">Ghee</option>
-  <option value="dahi">Dahi</option>
-  <option value="khoa">Khoa</option>
-  <option value="chhena">Chhena</option>
-  <option value="rasgulla">Rasgulla</option>
-  <option value="pedha">Pedha</option>
-  <option value="burfi">Burfi</option>
-  <option value="rabri">Rabri</option>
-  <option value="shrikhand">Shrikhand</option>
-  <option value="lassi">Lassi</option>
-  <option value="icecream">Ice Cream</option>
-</select><div id="extraInputs"></div><button onclick="calculateYield()">Calculate Yield</button>
+    <div id="productExtras"></div>
 
-<div class="output-box" id="result" style="display:none;"></div><footer>
-  <p><strong>Created by:</strong> Harsh Tiwari</p>
-  <p>B.Tech in Dairy Technology | <em>West Bengal University of Animal and Fishery Sciences, Kolkata</em></p>
-  <p>Passionate about traditional Indian dairy innovation & FSSAI-based processing standards.</p>
-</footer><script>
-function updateInputs() {
-  const product = document.getElementById('product').value;
-  const extraDiv = document.getElementById('extraInputs');
-  extraDiv.innerHTML = '';
-  if (product === 'paneer') {
-    extraDiv.innerHTML += `<label>Coagulant Type:</label><select><option>Citric Acid</option><option>Lactic Acid</option><option>Rennet</option></select>`;
-    extraDiv.innerHTML += `<label>Coagulation Temp (°C):</label><input type='number'>`;
-  } else if (product === 'ghee') {
-    extraDiv.innerHTML += `<label>Source Type:</label><select><option>Cream</option><option>Butter</option><option>Curd</option></select>`;
-  } else if (product === 'dahi') {
-    extraDiv.innerHTML += `<label>Culture %:</label><input type='number'>`;
-    extraDiv.innerHTML += `<label>Incubation Temp (°C):</label><input type='number'>`;
+    <label style="margin-top:12px">Optional: Moisture Content (%) — leave blank to use product default</label>
+    <input id="moisture" type="number" min="0" max="100" step="0.1" placeholder="e.g. 55">
+
+    <label>Loss Coefficient (operator/equipment losses %) — typical 3–8%</label>
+    <input id="lossCoeff" type="number" min="0" max="50" step="0.1" value="5">
+
+    <label>Processing Method</label>
+    <select id="processMethod">
+      <option value="traditional">Traditional (hand-made)</option>
+      <option value="semi">Semi-mechanized</option>
+      <option value="mechanized">Mechanized/Industrial</option>
+    </select>
+
+    <label>Temperature/Process Correction (%) — expected percent loss (e.g. 2 for small loss)</label>
+    <input id="tempCorrection" type="number" step="0.1" value="0">
+
+    <label>Season / Breed Note (optional)</label>
+    <input id="seasonNote" placeholder="e.g. summer cows, Murrah buffalo" type="text">
+
+    <button onclick="calculateYield()">Calculate Yield</button>
+
+    <div class="output" id="resultBox" style="display:none"></div>
+
+    <div class="collapse">
+      <div class="toggle" onclick="toggleFactors()">▶ Factors NOT Considered — click to expand</div>
+      <div id="factors" style="display:none;margin-top:10px">
+        <p><strong>Important factors often not captured by simple formulas:</strong></p>
+        <ul>
+          <li><strong>Milk freshness & acidity:</strong> Sour/high-acid milk reduces paneer yield (curdling losses).</li>
+          <li><strong>Processing conditions:</strong> Temperature, coagulation pH, time, and stirring affect retention of solids.</li>
+          <li><strong>Coagulant type & quantity:</strong> Lemon, citric acid, vinegar, rennet — each changes yield and texture.</li>
+          <li><strong>Straining & pressing:</strong> Tighter pressing reduces moisture and increases firm-mass but lowers recorded wet-weight.</li>
+          <li><strong>Breed & season:</strong> Breed differences and seasonal feed change fat/SNF beyond measured %.</li>
+          <li><strong>Water addition or loss:</strong> Dilution or evaporation during processing affects final weight.</li>
+          <li><strong>Equipment & operator skill:</strong> Leakages, inefficient separators, poor handling increase losses.</li>
+        </ul>
+        <p><em>Conclusion:</em> This tool gives a rough estimate suitable for demo, planning, or education. For production, validate with lab and process trials; use actual mass-balance measurements.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <aside class="card">
+    <h3>How the calculator adjusts for real factors</h3>
+    <p class="muted"><small>Defaults use simple empirical multipliers. You can fine-tune:</small></p>
+    <ul>
+      <li><strong>Moisture (%)</strong> — overrides product defaults to compute wet-weight from dry solids.</li>
+      <li><strong>Loss Coefficient</strong> — percentage loss for operator/equipment.</li>
+      <li><strong>Process Method</strong> — different multipliers applied (traditional has higher loss).</li>
+      <li><strong>Temp Correction</strong> — small percent change for poor/optimal temperatures.</li>
+    </ul>
+
+    <div style="margin-top:12px">
+      <strong>Product defaults</strong>
+      <div id="productDefaults" style="margin-top:8px"></div>
+    </div>
+
+    <hr>
+    <p class="muted"><small>Created by Harsh Tiwari — B.Tech Dairy Technology. Use as guideline only.</small></p>
+  </aside>
+</div>
+
+<footer>
+  <small class="muted">Tip: For best accuracy, run a trial batch and enter measured moisture & losses to calibrate the loss coefficient.</small>
+</footer>
+
+  </div><script>
+const defaults = {
+  paneer: {mult: 1.15, defaultMoisture: 60, note: 'Paneer — expected moisture ~55–60% depending on pressing.'},
+  ghee: {mult: 0.82, defaultMoisture: 0, note: 'Ghee yield from fat; very low moisture.'},
+  dahi: {mult: 1.1, defaultMoisture: 80, note: 'Dahi weight ~milk + some retained solids.'},
+  khoa: {mult: 0.9, defaultMoisture: 28, note: 'Khoa types vary; moisture important.'},
+  chhena: {mult: 0.95, defaultMoisture: 60, note: 'Chhena soft with higher moisture.'},
+  rasgulla: {mult: 1.1, defaultMoisture: 55, note:'Rasgulla wet-weight includes syrup.'},
+  pedha: {mult: 0.75, defaultMoisture: 25, note:'Pedha uses concentrated khoa (lower moisture).'},
+  burfi: {mult: 0.8, defaultMoisture: 20, note:'Burfi mostly solids.'},
+  rabri: {mult: 0.25, defaultMoisture: 75, note:'Rabri is condensed milk with high moisture.'},
+  shrikhand: {mult: 0.4, defaultMoisture: 60, note:'Shrikhand from drained curd.'},
+  lassi: {mult: 1.05, defaultMoisture: 90, note:'Lassi is diluted.'},
+  icecream: {mult: 1.4, defaultMoisture: 60, note:'Overrun affects volume, not wet mass.'}
+};
+
+function onProductChange(){
+  const p = document.getElementById('product').value;
+  const extras = document.getElementById('productExtras');
+  extras.innerHTML = '';
+  // show product-specific inputs
+  if(p === 'paneer'){
+    extras.innerHTML += `<label>Coagulant Type</label><select id="coagulant"><option>Citric Acid</option><option>Lemon Juice</option><option>Vinegar</option><option>Rennet</option></select>`;
+    extras.innerHTML += `<label>Coagulant amount (g per 10L) — approximate</label><input id="coagAmt" type="number" step="0.1" placeholder="e.g. 8">`;
+    extras.innerHTML += `<label>Pressing tightness</label><select id="pressing"><option value="light">Light (more moisture)</option><option value="normal" selected>Normal</option><option value="tight">Tight (drier)</option></select>`;
+  } else if(p === 'ghee'){
+    extras.innerHTML += `<label>Source</label><select id="gheeSrc"><option value="cream">Cream</option><option value="butter">Butter</option><option value="curd">Curd</option></select>`;
+  } else if(p === 'dahi'){
+    extras.innerHTML += `<label>Culture % (w/v)</label><input id="culturePct" type="number" step="0.01" placeholder="e.g. 0.5">`;
   }
+  // update product defaults panel
+  updateDefaultsPanel();
 }
 
-function calculateYield() {
-  const qty = parseFloat(document.getElementById('milkQty').value);
-  const fat = parseFloat(document.getElementById('fat').value);
-  const snf = parseFloat(document.getElementById('snf').value);
+function updateDefaultsPanel(){
+  const p = document.getElementById('product').value;
+  const panel = document.getElementById('productDefaults');
+  const d = defaults[p];
+  panel.innerHTML = `<strong>${p}</strong><div style="font-size:13px;color:var(--muted);margin-top:6px">Default multiplier: ${d.mult}, default moisture: ${d.defaultMoisture}%<div style="margin-top:6px">${d.note}</div></div>`;
+}
+
+function toggleFactors(){
+  const f = document.getElementById('factors');
+  const t = document.querySelector('.toggle');
+  if(f.style.display==='none'){f.style.display='block'; t.innerText='▼ Factors NOT Considered — click to collapse'} else {f.style.display='none'; t.innerText='▶ Factors NOT Considered — click to expand'}
+}
+
+onProductChange();
+
+function calculateYield(){
+  const qty = parseFloat(document.getElementById('milkQty').value) || 0;
+  const fat = parseFloat(document.getElementById('fat').value) || 0;
+  const snf = parseFloat(document.getElementById('snf').value) || 0;
   const milkType = document.getElementById('milkType').value;
   const product = document.getElementById('product').value;
 
-  let yieldVal = 0;
-  let standard = "";
-  let tips = "";
+  // base empirical multiplier
+  let baseMult = defaults[product].mult;
+  // adjust for milk type roughly
+  if(milkType === 'buffalo') baseMult *= 1.08;
+  if(milkType === 'mixed') baseMult *= 1.02;
 
-  switch(product) {
-    case "paneer":
-      const k = milkType === "buffalo" ? 1.3 : 1.1;
-      yieldVal = qty * ((fat + snf) / 100) * k;
-      standard = "<b>FSSAI:</b> Fat ≥ 50% (on dry matter), Moisture ≤ 60%";
-      tips = "Buffalo milk gives higher paneer yield due to higher solids.";
-      break;
-    case "ghee":
-      yieldVal = qty * (fat / 100) * 0.82;
-      standard = "<b>FSSAI:</b> Fat ≥ 99.5%, Moisture ≤ 0.5%";
-      tips = "Ghee yield depends mostly on fat content. Use buffalo milk for better output.";
-      break;
-    case "dahi":
-      yieldVal = qty * 1.1;
-      standard = "<b>FSSAI:</b> Min Fat: 3.0% (standard), SNF ≥ 8.5%";
-      tips = "SNF and culture quantity affect dahi texture and yield.";
-      break;
-    case "khoa":
-      yieldVal = qty * ((fat + snf) / 100) * 0.9;
-      standard = "<b>FSSAI:</b> Moisture content varies by type (Dhap: 40%, Danedar: 20%, Pindi: 15%)";
-      tips = "Buffalo milk preferred for higher khoa yield.";
-      break;
-    case "chhena":
-      yieldVal = qty * ((fat + snf) / 100) * 0.95;
-      standard = "<b>FSSAI:</b> Similar to paneer, higher moisture allowed";
-      tips = "Use cow milk for softer chhena used in sweets.";
-      break;
-    case "rasgulla":
-      yieldVal = qty * ((fat + snf) / 100) * 1.1;
-      standard = "<b>FSSAI:</b> Moisture max 50%, fat min 5% on dry matter";
-      tips = "Fresh chhena and controlled syrup cooking gives best result.";
-      break;
-    case "pedha":
-      yieldVal = qty * ((fat + snf) / 100) * 0.75;
-      standard = "<b>FSSAI:</b> Milk solids ≥ 65%, sugar varies";
-      tips = "Overheating khoa reduces pedha softness.";
-      break;
-    case "burfi":
-      yieldVal = qty * ((fat + snf) / 100) * 0.8;
-      standard = "<b>FSSAI:</b> Khoa + sugar, minimum 60% solids";
-      tips = "Use pindi khoa for best texture.";
-      break;
-    case "rabri":
-      yieldVal = qty * 0.25;
-      standard = "<b>FSSAI:</b> Traditional product, no fixed standard";
-      tips = "Buffalo milk gives thicker rabri due to higher solids.";
-      break;
-    case "shrikhand":
-      yieldVal = qty * 0.4;
-      standard = "<b>FSSAI:</b> Fat ≥ 8.5%, sugar 40-45%";
-      tips = "Proper whey drainage gives better shrikhand yield.";
-      break;
-    case "lassi":
-      yieldVal = qty * 1.05;
-      standard = "<b>FSSAI:</b> Min fat: 0.8%, SNF ≥ 6.0%";
-      tips = "Sweetened lassi yield is higher due to added sugar/water.";
-      break;
-    case "icecream":
-      yieldVal = qty * ((fat + snf) / 100) * 1.4;
-      standard = "<b>FSSAI:</b> Fat ≥ 10%, total solids ≥ 36% (for full cream)";
-      tips = "Higher overrun increases volume but not weight.";
-      break;
+  // simple base yield using solids
+  let baseYield = 0;
+  if(product === 'ghee'){
+    baseYield = qty * (fat/100) * defaults[product].mult; // ghee from fat
+  } else if(product === 'dahi' || product === 'lassi'){
+    baseYield = qty * defaults[product].mult; // fermented products approx
+  } else if(product === 'rabri' || product === 'shrikhand' || product === 'icecream'){
+    baseYield = qty * ((fat + snf)/100) * baseMult; // solids-based with multiplier
+  } else {
+    baseYield = qty * ((fat + snf)/100) * baseMult;
   }
 
-  document.getElementById('result').style.display = 'block';
-  document.getElementById('result').innerHTML = `
-    <h2>📦 Estimated Yield: ${yieldVal.toFixed(2)} kg</h2>
-    <p><b>Tips:</b> ${tips}</p>
-    <div class="standard">${standard}</div>
-  `;
+  // product-specific tweaks
+  if(product === 'paneer'){
+    const pressing = document.getElementById('pressing') ? document.getElementById('pressing').value : 'normal';
+    if(pressing === 'tight') baseYield *= 0.92; // drier -> lower wet weight
+    if(pressing === 'light') baseYield *= 1.06; // more moisture retained -> higher wet weight
+    const coagAmt = parseFloat(document.getElementById('coagAmt')?.value || 0);
+    const coagulant = document.getElementById('coagulant')?.value;
+    if(coagulant && coagulant.toLowerCase().includes('vinegar')) baseYield *= 0.98; // small empirical effect
+    if(coagulant && coagulant.toLowerCase().includes('lemon')) baseYield *= 0.995;
+  }
+
+  // user-provided moisture override or use default
+  let moistureInput = document.getElementById('moisture').value;
+  let moisture = moistureInput !== '' ? parseFloat(moistureInput) : defaults[product].defaultMoisture;
+  if(isNaN(moisture)) moisture = defaults[product].defaultMoisture;
+
+  // convert baseYield (dry-matter based) to wet-weight via moisture (rough)
+  // assume baseYield currently represents total retained solids mass — convert using moisture percentage
+  // wet_weight = dry_mass / (1 - moistureFraction)
+  // But many formulas approximate using (fat+snf)/100 * qty * multiplier = wet mass — we apply moisture as corrective factor
+  let wetYield = baseYield * (100 - moisture)/100; // adjust for moisture fraction
+
+  // apply loss coefficient (operator/equipment)
+  const lossCoeff = (parseFloat(document.getElementById('lossCoeff').value) || 0)/100;
+  wetYield = wetYield * (1 - lossCoeff);
+
+  // processing method correction
+  const method = document.getElementById('processMethod').value;
+  const methodMultipliers = {traditional:0.95, semi:0.98, mechanized:1.00};
+  wetYield = wetYield * (methodMultipliers[method] || 1);
+
+  // temperature/process correction (percent)
+  const tempCorr = (parseFloat(document.getElementById('tempCorrection').value) || 0)/100;
+  wetYield = wetYield * (1 - tempCorr);
+
+  // final safety clamp
+  if(wetYield < 0) wetYield = 0;
+
+  // display
+  const res = document.getElementById('resultBox');
+  res.style.display = 'block';
+  res.innerHTML = `<h3>Estimated Yield: <strong>${wetYield.toFixed(2)} kg</strong></h3>` +
+                  `<p><small class="muted">(Based on entered milk qty, fat, SNF and adjustable correction factors)</small></p>` +
+                  `<div style="margin-top:8px"><strong>Calculation details:</strong><ul style='margin-top:6px;color:var(--muted)'>` +
+                  `<li>Base multiplier used: ${baseMult.toFixed(3)}</li>` +
+                  `<li>Moisture applied: ${moisture}%</li>` +
+                  `<li>Loss coefficient: ${(lossCoeff*100).toFixed(2)}%</li>` +
+                  `<li>Processing method multiplier: ${methodMultipliers[method]}</li>` +
+                  `<li>Temp/process correction: ${(tempCorr*100).toFixed(2)}%</li>` +
+                  `</ul></div>`;
+
+  // show a quick calibration hint
+  res.innerHTML += `<div style="margin-top:10px;padding:8px;background:#fff;border-radius:8px;border:1px solid #eef"><strong>Quick tip:</strong> Run a small trial batch and enter measured wet yield & moisture to adjust the loss coefficient for better accuracy.</div>`;
 }
 </script></body>
 </html>
